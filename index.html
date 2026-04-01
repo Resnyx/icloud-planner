@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="it" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>iCloud Planner</title>
+
+<!-- PWA -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="iCloud Planner">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0c0c0e">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%230c0c0e'/%3E%3Crect x='20' y='20' width='140' height='140' rx='28' fill='%23131316'/%3E%3Crect x='35' y='45' width='110' height='75' rx='10' fill='none' stroke='%234ade80' stroke-width='7'/%3E%3Cpath d='M60 118 l60 0 M90 120 l0 18' stroke='%234ade80' stroke-width='7' stroke-linecap='round'/%3E%3Cpath d='M55 75 l18 18 28-28' stroke='%234ade80' stroke-width='7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --font-body:    'Geist', system-ui, sans-serif;
+  --font-display: 'Geist', system-ui, sans-serif;
+  --text-xs:   clamp(0.75rem,  0.7rem  + 0.25vw, 0.875rem);
+  --text-sm:   clamp(0.875rem, 0.8rem  + 0.35vw, 1rem);
+  --text-base: clamp(1rem,     0.95rem + 0.25vw, 1.125rem);
+  --text-lg:   clamp(1.125rem, 1rem    + 0.75vw, 1.5rem);
+  --space-1:0.25rem;--space-2:0.5rem;--space-3:0.75rem;--space-4:1rem;
+  --space-5:1.25rem;--space-6:1.5rem;--space-8:2rem;--space-10:2.5rem;--space-12:3rem;
+  --radius-sm:0.375rem;--radius-md:0.5rem;--radius-lg:0.75rem;
+  --radius-xl:1rem;--radius-2xl:1.5rem;--radius-full:9999px;
+  --transition:160ms cubic-bezier(0.16,1,0.3,1);
+  --safe-top:    env(safe-area-inset-top,    0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left:   env(safe-area-inset-left,   0px);
+  --safe-right:  env(safe-area-inset-right,  0px);
+}
+[data-theme="dark"] {
+  --bg:#0c0c0e;--surface:#131316;--surface-2:#1a1a1e;--surface-3:#212126;
+  --border:#2a2a30;--border-subtle:rgba(255,255,255,0.05);
+  --text:#f0eff4;--text-muted:#8a8a96;--text-faint:#4a4a55;
+  --green:#4ade80;--green-dim:rgba(74,222,128,0.12);--green-border:rgba(74,222,128,0.22);--green-glow:rgba(74,222,128,0.06);
+  --amber:#fbbf24;--amber-dim:rgba(251,191,36,0.12);--amber-border:rgba(251,191,36,0.25);
+  --red:#f87171;--red-dim:rgba(248,113,113,0.12);--red-border:rgba(248,113,113,0.22);
+  --blue:#60a5fa;--blue-dim:rgba(96,165,250,0.12);
+  --pink:#f472b6;--pink-dim:rgba(244,114,182,0.12);
+  --nav-bg:rgba(13,13,15,0.85);
+  --shadow-sm:0 1px 3px rgba(0,0,0,0.4);--shadow-md:0 4px 16px rgba(0,0,0,0.5);
+}
+[data-theme="light"] {
+  --bg:#f5f5f7;--surface:#ffffff;--surface-2:#f0f0f5;--surface-3:#e8e8ef;
+  --border:#d8d8e0;--border-subtle:rgba(0,0,0,0.06);
+  --text:#1a1a24;--text-muted:#6a6a7a;--text-faint:#b0b0bc;
+  --green:#16a34a;--green-dim:rgba(22,163,74,0.10);--green-border:rgba(22,163,74,0.25);--green-glow:rgba(22,163,74,0.04);
+  --amber:#d97706;--amber-dim:rgba(217,119,6,0.10);--amber-border:rgba(217,119,6,0.25);
+  --red:#dc2626;--red-dim:rgba(220,38,38,0.10);--red-border:rgba(220,38,38,0.25);
+  --blue:#2563eb;--blue-dim:rgba(37,99,235,0.10);
+  --pink:#db2777;--pink-dim:rgba(219,39,119,0.10);
+  --nav-bg:rgba(245,245,247,0.85);
+  --shadow-sm:0 1px 3px rgba(0,0,0,0.08);--shadow-md:0 4px 16px rgba(0,0,0,0.10);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;scroll-behavior:smooth;}
+body{font-family:var(--font-body);font-size:var(--text-sm);background:var(--bg);color:var(--text);min-height:100dvh;transition:background var(--transition),color var(--transition);-webkit-tap-highlight-color:transparent;}
+button{cursor:pointer;border:none;background:none;font:inherit;color:inherit;}
+input,textarea{font:inherit;color:inherit;}
+::selection{background:var(--green-dim);color:var(--text);}
+:focus-visible{outline:2px solid var(--green);outline-offset:3px;border-radius:var(--radius-sm);}
+
+/* ---- DESKTOP ---- */
+.desktop-layout{display:block;padding:var(--space-6) var(--space-4) var(--space-12);}
+.desktop-layout .wrapper{max-width:680px;margin:0 auto;}
+
+/* ---- MOBILE ---- */
+.mobile-layout{display:none;flex-direction:column;min-height:100dvh;background:var(--bg);}
+
+.mobile-topbar{
+  position:sticky;top:0;z-index:50;
+  background:var(--nav-bg);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);
+  border-bottom:1px solid var(--border-subtle);
+  padding-top:calc(var(--safe-top) + var(--space-3));padding-bottom:var(--space-3);
+  padding-left:calc(var(--safe-left) + var(--space-4));padding-right:calc(var(--safe-right) + var(--space-4));
+  display:flex;align-items:center;justify-content:space-between;gap:var(--space-3);
+}
+.mobile-topbar-title{font-size:var(--text-base);font-weight:600;letter-spacing:-0.02em;display:flex;align-items:center;gap:var(--space-2);}
+.mobile-topbar-title span{color:var(--green);}
+.mobile-topbar-right{display:flex;align-items:center;gap:var(--space-2);}
+.mobile-month-nav{display:flex;align-items:center;gap:var(--space-2);background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-full);padding:3px;}
+.mobile-month-nav button{width:32px;height:32px;border-radius:var(--radius-full);display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:15px;min-width:44px;min-height:44px;transition:background var(--transition),color var(--transition);}
+.mobile-month-nav button:active{background:var(--surface-3);color:var(--text);}
+.mobile-month-label{font-size:var(--text-sm);font-weight:600;min-width:110px;text-align:center;letter-spacing:-0.02em;}
+
+.mobile-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:var(--space-4);padding-left:calc(var(--safe-left) + var(--space-4));padding-right:calc(var(--safe-right) + var(--space-4));padding-bottom:calc(var(--safe-bottom) + 80px);}
+
+.mobile-bottombar{position:fixed;bottom:0;left:0;right:0;z-index:50;background:var(--nav-bg);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border-top:1px solid var(--border-subtle);padding-bottom:var(--safe-bottom);display:flex;align-items:center;justify-content:space-around;padding-top:var(--space-2);height:calc(60px + var(--safe-bottom));}
+.bottombar-btn{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:60px;min-height:44px;color:var(--text-faint);font-size:10px;letter-spacing:0.03em;font-weight:500;transition:color var(--transition);padding:var(--space-1) var(--space-3);border-radius:var(--radius-lg);}
+.bottombar-btn.active{color:var(--green);}
+.bottombar-btn:active{background:var(--surface-2);}
+.bottombar-btn svg{width:22px;height:22px;}
+
+/* ---- COMPONENTI CONDIVISI ---- */
+.stats-banner{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-2xl);padding:var(--space-5);margin-bottom:var(--space-4);position:relative;overflow:hidden;box-shadow:var(--shadow-sm);}
+.stats-banner::before{content:'';position:absolute;top:-60px;right:-60px;width:180px;height:180px;background:radial-gradient(circle,var(--green-glow) 0%,transparent 70%);pointer-events:none;}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:var(--space-3);margin-bottom:var(--space-4);}
+.stat-item{display:flex;flex-direction:column;gap:2px;}
+.stat-label{font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-faint);font-weight:500;}
+.stat-value{font-size:clamp(1.3rem,3vw,1.9rem);font-weight:600;letter-spacing:-0.04em;line-height:1;}
+.stat-value.green{color:var(--green);}
+.stat-value.red{color:var(--red);}
+.stat-value.amber{color:var(--amber);}
+.progress-wrap{height:3px;background:var(--border);border-radius:var(--radius-full);overflow:hidden;}
+.progress-fill{height:100%;background:var(--green);border-radius:var(--radius-full);transition:width 0.5s cubic-bezier(0.34,1.56,0.64,1);}
+.progress-meta{display:flex;justify-content:space-between;margin-top:var(--space-2);}
+.progress-pct{font-size:var(--text-xs);color:var(--text-faint);font-variant-numeric:tabular-nums;}
+.progress-pct span{color:var(--green);font-weight:600;}
+
+.section-title{font-size:10px;letter-spacing:0.10em;text-transform:uppercase;color:var(--text-faint);font-weight:500;margin-bottom:var(--space-3);}
+
+.persone-list{display:flex;flex-direction:column;gap:var(--space-2);margin-bottom:var(--space-6);}
+.persona-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:var(--space-4);display:flex;align-items:center;justify-content:space-between;gap:var(--space-3);transition:border-color var(--transition),background var(--transition),box-shadow var(--transition);box-shadow:var(--shadow-sm);}
+.persona-card:active{background:var(--surface-2);}
+.persona-card.paid{background:var(--green-dim);border-color:var(--green-border);}
+.persona-card.overdue{background:var(--red-dim);border-color:var(--red-border);}
+.persona-left{display:flex;align-items:center;gap:var(--space-3);}
+.avatar{width:40px;height:40px;border-radius:var(--radius-full);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;border:1px solid var(--border-subtle);}
+.persona-nome{font-size:var(--text-sm);font-weight:500;letter-spacing:-0.01em;line-height:1.2;}
+.persona-det{font-size:var(--text-xs);color:var(--text-muted);margin-top:1px;}
+.scadenza-tag{display:inline-flex;align-items:center;gap:3px;font-size:10px;padding:1px 7px;border-radius:var(--radius-full);margin-top:4px;font-weight:500;}
+.scadenza-tag.ok{background:var(--green-dim);color:var(--green);border:1px solid var(--green-border);}
+.scadenza-tag.overdue{background:var(--red-dim);color:var(--red);border:1px solid var(--red-border);}
+.scadenza-tag.upcoming{background:var(--amber-dim);color:var(--amber);border:1px solid var(--amber-border);}
+.scadenza-tag.neutral{background:var(--surface-3);color:var(--text-muted);border:1px solid var(--border);}
+.persona-right{display:flex;align-items:center;gap:var(--space-3);}
+.persona-importo{font-size:var(--text-base);font-weight:600;letter-spacing:-0.03em;color:var(--text-faint);text-align:right;min-width:58px;font-variant-numeric:tabular-nums;transition:color var(--transition);}
+.persona-importo.paid{color:var(--green);}
+
+.toggle{position:relative;width:48px;height:28px;flex-shrink:0;}
+.toggle input{opacity:0;width:0;height:0;position:absolute;}
+.toggle-track{position:absolute;inset:0;background:var(--surface-3);border:1px solid var(--border);border-radius:var(--radius-full);cursor:pointer;transition:background var(--transition),border-color var(--transition);}
+.toggle-track::before{content:'';position:absolute;left:3px;top:3px;width:20px;height:20px;background:var(--text-faint);border-radius:50%;transition:transform 0.22s cubic-bezier(0.34,1.56,0.64,1),background var(--transition);}
+.toggle input:checked ~ .toggle-track{background:var(--green-dim);border-color:var(--green-border);}
+.toggle input:checked ~ .toggle-track::before{transform:translateX(20px);background:var(--green);}
+.toggle input:disabled ~ .toggle-track{cursor:not-allowed;opacity:0.5;}
+
+.storico-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);overflow:hidden;margin-bottom:var(--space-6);box-shadow:var(--shadow-sm);}
+.storico-table{width:100%;border-collapse:collapse;font-size:var(--text-xs);}
+.storico-table thead{background:var(--surface-2);border-bottom:1px solid var(--border);}
+.storico-table th{text-align:left;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-faint);padding:var(--space-3);font-weight:500;}
+.storico-table td{padding:var(--space-3);border-bottom:1px solid var(--border-subtle);color:var(--text-muted);vertical-align:middle;}
+.storico-table tbody tr:last-child td{border-bottom:none;}
+.storico-table td:first-child{font-size:var(--text-sm);font-weight:500;color:var(--text);letter-spacing:-0.01em;}
+.storico-table tbody tr{transition:background var(--transition);}
+.storico-table tbody tr:active{background:var(--surface-2);}
+.badge{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:var(--radius-full);font-size:10px;font-weight:500;white-space:nowrap;}
+.badge::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0;}
+.badge.paid{background:var(--green-dim);color:var(--green);border:1px solid var(--green-border);}
+.badge.pending{background:var(--red-dim);color:var(--red);border:1px solid var(--red-border);}
+.badge.partial{background:var(--amber-dim);color:var(--amber);border:1px solid var(--amber-border);}
+
+.note-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:var(--space-4);margin-bottom:var(--space-4);box-shadow:var(--shadow-sm);transition:border-color var(--transition);}
+.note-card:focus-within{border-color:rgba(255,255,255,0.14);}
+.note-card textarea{width:100%;background:transparent;border:none;outline:none;color:var(--text-muted);font-family:var(--font-body);font-size:var(--text-sm);resize:none;line-height:1.7;min-height:56px;}
+.note-card textarea::placeholder{color:var(--text-faint);}
+
+.loader{display:flex;align-items:center;justify-content:center;gap:var(--space-2);padding:var(--space-10);color:var(--text-faint);font-size:var(--text-xs);}
+.spinner{width:14px;height:14px;border:1.5px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:spin 0.7s linear infinite;flex-shrink:0;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.saving-indicator{position:fixed;top:calc(var(--safe-top) + var(--space-4));right:var(--space-4);z-index:200;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-full);padding:var(--space-2) var(--space-4);font-size:var(--text-xs);color:var(--text-muted);opacity:0;transform:translateY(-4px);transition:opacity 0.25s,transform 0.25s;pointer-events:none;display:flex;align-items:center;gap:var(--space-2);}
+.saving-indicator.show{opacity:1;transform:translateY(0);}
+.saving-indicator.saved{color:var(--green);border-color:var(--green-border);}
+.saving-indicator.error{color:var(--red);border-color:var(--red-border);}
+.saving-dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0;}
+.saving-indicator:not(.saved):not(.error) .saving-dot{animation:pulse 0.9s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+
+.theme-btn{width:36px;height:36px;border-radius:var(--radius-full);background:var(--surface-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text-muted);transition:background var(--transition),color var(--transition);min-width:44px;min-height:44px;}
+.theme-btn:active{background:var(--surface-3);color:var(--text);}
+
+/* Desktop header */
+header{display:flex;align-items:center;justify-content:space-between;gap:var(--space-4);margin-bottom:var(--space-8);padding-bottom:var(--space-6);border-bottom:1px solid var(--border);}
+.logo{display:flex;align-items:center;gap:var(--space-3);}
+.logo-icon{width:38px;height:38px;border-radius:var(--radius-lg);background:var(--green-dim);border:1px solid var(--green-border);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.logo-text h1{font-size:var(--text-lg);font-weight:600;line-height:1.1;letter-spacing:-0.03em;}
+.logo-text h1 span{color:var(--green);}
+.logo-text p{font-size:var(--text-xs);color:var(--text-faint);letter-spacing:0.06em;text-transform:uppercase;margin-top:3px;}
+.header-right{display:flex;align-items:center;gap:var(--space-2);}
+.month-nav{display:flex;align-items:center;gap:var(--space-1);background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-full);padding:var(--space-1);}
+.month-nav button{width:28px;height:28px;border-radius:var(--radius-full);display:flex;align-items:center;justify-content:center;color:var(--text-muted);transition:background var(--transition),color var(--transition);font-size:13px;}
+.month-nav button:hover{background:var(--surface-3);color:var(--text);}
+.month-label-desktop{font-size:var(--text-sm);font-weight:500;min-width:120px;text-align:center;padding:0 var(--space-1);color:var(--text);letter-spacing:-0.01em;}
+footer{text-align:center;color:var(--text-faint);font-size:var(--text-xs);letter-spacing:0.06em;text-transform:uppercase;padding-top:var(--space-4);border-top:1px solid var(--border-subtle);}
+
+/* PWA Banner */
+.pwa-banner{display:none;background:var(--surface);border:1px solid var(--green-border);border-radius:var(--radius-xl);padding:var(--space-4);margin-bottom:var(--space-4);gap:var(--space-3);align-items:center;}
+.pwa-banner.show{display:flex;}
+.pwa-banner-text{flex:1;font-size:var(--text-xs);color:var(--text-muted);line-height:1.5;}
+.pwa-banner-text strong{color:var(--text);font-weight:600;display:block;margin-bottom:2px;}
+.pwa-banner-btn{background:var(--green-dim);color:var(--green);border:1px solid var(--green-border);border-radius:var(--radius-lg);padding:var(--space-2) var(--space-3);font-size:var(--text-xs);font-weight:600;white-space:nowrap;flex-shrink:0;transition:background var(--transition);}
+.pwa-banner-close{color:var(--text-faint);font-size:18px;line-height:1;min-width:32px;min-height:32px;display:flex;align-items:center;justify-content:center;}
+
+/* Animazioni */
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.wrapper > *,.mobile-scroll > *{animation:fadeUp 0.35s cubic-bezier(0.16,1,0.3,1) both;}
+.wrapper > *:nth-child(1),.mobile-scroll > *:nth-child(1){animation-delay:0s}
+.wrapper > *:nth-child(2),.mobile-scroll > *:nth-child(2){animation-delay:.05s}
+.wrapper > *:nth-child(3),.mobile-scroll > *:nth-child(3){animation-delay:.10s}
+.wrapper > *:nth-child(4),.mobile-scroll > *:nth-child(4){animation-delay:.15s}
+.wrapper > *:nth-child(5),.mobile-scroll > *:nth-child(5){animation-delay:.20s}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+/* Breakpoints */
+@media(max-width:768px){
+  .desktop-layout{display:none!important;}
+  .mobile-layout{display:flex!important;}
+}
+@media(min-width:769px){
+  .desktop-layout{display:block;padding:var(--space-6) var(--space-4) var(--space-12);}
+  .mobile-layout{display:none!important;}
+}
+</style>
+</head>
+<body>
+
+<div class="saving-indicator" id="savingIndicator" role="status" aria-live="polite">
+  <span class="saving-dot"></span>
+  <span id="savingText">Salvataggio…</span>
+</div>
+
+<!-- ===================== DESKTOP ===================== -->
+<div class="desktop-layout">
+  <div class="wrapper">
+    <header>
+      <div class="logo">
+        <div class="logo-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:var(--green)">
+            <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M7 8l3 3 5-5"/>
+          </svg>
+        </div>
+        <div class="logo-text">
+          <h1>i<span>Cloud</span> Planner</h1>
+          <p>Sincronizzato con Google Sheets</p>
+        </div>
+      </div>
+      <div class="header-right">
+        <nav class="month-nav">
+          <button onclick="changeMonth(-1)" aria-label="Mese precedente">‹</button>
+          <div class="month-label-desktop" id="monthLabelDesktop"></div>
+          <button onclick="changeMonth(1)" aria-label="Mese successivo">›</button>
+        </nav>
+        <button class="theme-btn" id="themeBtnDesktop" aria-label="Cambia tema"></button>
+      </div>
+    </header>
+
+    <section class="stats-banner">
+      <div class="stats-grid">
+        <div class="stat-item"><span class="stat-label">Da incassare</span><span class="stat-value" id="statTotaleD">—</span></div>
+        <div class="stat-item"><span class="stat-label">Incassato</span><span class="stat-value green" id="statPagatoD">—</span></div>
+        <div class="stat-item"><span class="stat-label">Mancante</span><span class="stat-value red" id="statMancanteD">—</span></div>
+      </div>
+      <div class="progress-wrap"><div class="progress-fill" id="progressBarD" style="width:0%"></div></div>
+      <div class="progress-meta"><span class="progress-pct" id="progressPctD">Caricamento…</span></div>
+    </section>
+
+    <p class="section-title">Pagamenti del mese</p>
+    <div class="persone-list" id="personeListD" role="list">
+      <div class="loader"><div class="spinner"></div>Caricamento…</div>
+    </div>
+
+    <p class="section-title">Storico ultimi 6 mesi</p>
+    <div class="storico-card">
+      <table class="storico-table">
+        <thead><tr><th>Mese</th><th>Daniele</th><th>Attilio</th><th>Martina</th><th>Totale</th></tr></thead>
+        <tbody id="storicoBodyD"><tr><td colspan="5"><div class="loader"><div class="spinner"></div></div></td></tr></tbody>
+      </table>
+    </div>
+
+    <p class="section-title">Note del mese</p>
+    <div class="note-card">
+      <textarea id="noteTextareaD" placeholder="Aggiungi note o promemoria…" rows="3"></textarea>
+    </div>
+
+    <footer>iCloud 6 persone &nbsp;·&nbsp; €5,85/quota &nbsp;·&nbsp; Dati su Google Sheets</footer>
+  </div>
+</div>
+
+<!-- ===================== MOBILE ===================== -->
+<div class="mobile-layout">
+  <div class="mobile-topbar">
+    <div class="mobile-topbar-title">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--green)">
+        <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M7 8l3 3 5-5"/>
+      </svg>
+      i<span>Cloud</span>&nbsp;Planner
+    </div>
+    <div class="mobile-topbar-right">
+      <nav class="mobile-month-nav">
+        <button onclick="changeMonth(-1)" aria-label="Mese precedente">‹</button>
+        <div class="mobile-month-label" id="monthLabelMobile"></div>
+        <button onclick="changeMonth(1)" aria-label="Mese successivo">›</button>
+      </nav>
+      <button class="theme-btn" id="themeBtnMobile" aria-label="Cambia tema"></button>
+    </div>
+  </div>
+
+  <div class="mobile-scroll" id="mobileScroll">
+    <div class="pwa-banner" id="pwaBanner">
+      <div class="pwa-banner-text">
+        <strong>Aggiungi alla schermata Home</strong>
+        Usa iCloud Planner come app nativa, senza barra Safari.
+      </div>
+      <button class="pwa-banner-btn" onclick="showPwaInstructions()">Installa</button>
+      <button class="pwa-banner-close" onclick="closePwaBanner()" aria-label="Chiudi">×</button>
+    </div>
+
+    <section class="stats-banner">
+      <div class="stats-grid">
+        <div class="stat-item"><span class="stat-label">Da incassare</span><span class="stat-value" id="statTotaleM">—</span></div>
+        <div class="stat-item"><span class="stat-label">Incassato</span><span class="stat-value green" id="statPagatoM">—</span></div>
+        <div class="stat-item"><span class="stat-label">Mancante</span><span class="stat-value red" id="statMancanteM">—</span></div>
+      </div>
+      <div class="progress-wrap"><div class="progress-fill" id="progressBarM" style="width:0%"></div></div>
+      <div class="progress-meta"><span class="progress-pct" id="progressPctM">Caricamento…</span></div>
+    </section>
+
+    <div id="tabPagamenti">
+      <p class="section-title">Pagamenti del mese</p>
+      <div class="persone-list" id="personeListM" role="list">
+        <div class="loader"><div class="spinner"></div>Caricamento…</div>
+      </div>
+    </div>
+    <div id="tabStorico" style="display:none">
+      <p class="section-title">Storico ultimi 6 mesi</p>
+      <div class="storico-card">
+        <table class="storico-table">
+          <thead><tr><th>Mese</th><th>Daniele</th><th>Attilio</th><th>Martina</th><th>Totale</th></tr></thead>
+          <tbody id="storicoBodyM"><tr><td colspan="5"><div class="loader"><div class="spinner"></div></div></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+    <div id="tabNote" style="display:none">
+      <p class="section-title">Note del mese</p>
+      <div class="note-card">
+        <textarea id="noteTextareaM" placeholder="Aggiungi note o promemoria…" rows="5"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <nav class="mobile-bottombar">
+    <button class="bottombar-btn active" id="btnTabPagamenti" onclick="switchTab('pagamenti')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/><path d="M12 6v6l4 2"/></svg>
+      Pagamenti
+    </button>
+    <button class="bottombar-btn" id="btnTabStorico" onclick="switchTab('storico')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+      Storico
+    </button>
+    <button class="bottombar-btn" id="btnTabNote" onclick="switchTab('note')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      Note
+    </button>
+  </nav>
+</div>
+
+<!-- Modal PWA -->
+<div id="pwaModal" style="display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);align-items:flex-end;justify-content:center;">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-2xl) var(--radius-2xl) 0 0;padding:var(--space-6);padding-bottom:calc(var(--safe-bottom) + var(--space-6));max-width:480px;width:100%;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-4);">
+      <span style="font-weight:600;font-size:var(--text-base);letter-spacing:-0.02em">Aggiungi alla schermata Home</span>
+      <button onclick="closePwaModal()" style="color:var(--text-faint);font-size:22px;min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;">×</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:var(--space-4);">
+      <div style="display:flex;align-items:flex-start;gap:var(--space-3);">
+        <div style="background:var(--green-dim);border:1px solid var(--green-border);border-radius:var(--radius-md);width:32px;height:32px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--green);font-weight:700;">1</div>
+        <div><div style="font-weight:500;font-size:var(--text-sm);margin-bottom:2px">Tocca il pulsante Condividi</div><div style="color:var(--text-muted);font-size:var(--text-xs)">Nella barra in basso di Safari, tocca l'icona <strong style="color:var(--text)">□↑</strong></div></div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:var(--space-3);">
+        <div style="background:var(--green-dim);border:1px solid var(--green-border);border-radius:var(--radius-md);width:32px;height:32px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--green);font-weight:700;">2</div>
+        <div><div style="font-weight:500;font-size:var(--text-sm);margin-bottom:2px">Scorri e tocca "Aggiungi a schermata Home"</div><div style="color:var(--text-muted);font-size:var(--text-xs)">Cerca l'opzione con l'icona <strong style="color:var(--text)">+</strong> nel menu</div></div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:var(--space-3);">
+        <div style="background:var(--green-dim);border:1px solid var(--green-border);border-radius:var(--radius-md);width:32px;height:32px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--green);font-weight:700;">3</div>
+        <div><div style="font-weight:500;font-size:var(--text-sm);margin-bottom:2px">Tocca "Aggiungi" in alto a destra</div><div style="color:var(--text-muted);font-size:var(--text-xs)">L'app apparirà nella schermata Home come app nativa</div></div>
+      </div>
+    </div>
+    <button onclick="closePwaModal()" style="margin-top:var(--space-6);width:100%;padding:var(--space-4);background:var(--green-dim);color:var(--green);border:1px solid var(--green-border);border-radius:var(--radius-xl);font-weight:600;font-size:var(--text-sm);">Ho capito</button>
+  </div>
+</div>
+
+<script>
+// ================================================
+// CONFIGURAZIONE — modifica solo questi valori
+// ================================================
+const WORKER_URL = "https://IL_TUO_WORKER.IL_TUO_NOME.workers.dev";
+// ================================================
+
+const QUOTA  = 5.85;
+const MESI   = ["Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno",
+                 "Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre"];
+const SCADENZE = { daniele:4, attilio:1, martina:25 };
+const PERSONE_CONFIG = [
+  { id:'daniele', nome:'Daniele', emoji:'🦁', quote:2, color:'var(--green)' },
+  { id:'attilio', nome:'Attilio', emoji:'🔵', quote:1, color:'var(--blue)'  },
+  { id:'martina', nome:'Martina', emoji:'🌸', quote:1, color:'var(--pink)'  },
+];
+
+const oggi       = new Date();
+let currentYear  = oggi.getFullYear();
+let currentMonth = oggi.getMonth();
+let currentPagamenti = {};
+let noteTimer = null;
+let saving    = false;
+let theme     = 'dark';
+let activeTab = 'pagamenti';
+const isMobile = () => window.innerWidth <= 768;
+
+// ---- WORKER API ----
+async function callWorker(action, params = {}) {
+  const res = await fetch(`${WORKER_URL}/${action}`, {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify(params)
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+// ---- TEMA ----
+(function initTheme() {
+  theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', theme);
+  updateThemeIcons();
+})();
+['themeBtnDesktop','themeBtnMobile'].forEach(id => {
+  const btn = document.getElementById(id);
+  if (btn) btn.addEventListener('click', () => {
+    theme = theme === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', theme);
+    updateThemeIcons();
+  });
+});
+function updateThemeIcons() {
+  const sun  = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>`;
+  const moon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
+  ['themeBtnDesktop','themeBtnMobile'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) btn.innerHTML = theme === 'dark' ? sun : moon;
+  });
+}
+
+// ---- PWA ----
+(function initPwa() {
+  const isIOS        = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isStandalone = navigator.standalone === true;
+  if (isIOS && !isStandalone) document.getElementById('pwaBanner').classList.add('show');
+})();
+function closePwaBanner()    { document.getElementById('pwaBanner').classList.remove('show'); }
+function showPwaInstructions(){ closePwaBanner(); document.getElementById('pwaModal').style.display = 'flex'; }
+function closePwaModal()     { document.getElementById('pwaModal').style.display = 'none'; }
+
+// ---- TAB MOBILE ----
+function switchTab(tab) {
+  activeTab = tab;
+  ['pagamenti','storico','note'].forEach(t => {
+    const c = document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1));
+    const b = document.getElementById('btnTab' + t.charAt(0).toUpperCase() + t.slice(1));
+    if (c) c.style.display = t === tab ? 'block' : 'none';
+    if (b) b.classList.toggle('active', t === tab);
+  });
+  document.getElementById('mobileScroll').scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ---- SAVING ----
+function showSaving(msg, cls) {
+  const el = document.getElementById('savingIndicator');
+  document.getElementById('savingText').textContent = msg;
+  el.className = 'saving-indicator show' + (cls ? ' ' + cls : '');
+}
+function hideSaving() { document.getElementById('savingIndicator').className = 'saving-indicator'; }
+
+// ---- CARICAMENTO ----
+function loadData() {
+  ['personeListD','personeListM'].forEach(id => {
+    document.getElementById(id).innerHTML = '<div class="loader"><div class="spinner"></div>Caricamento…</div>';
+  });
+
+  callWorker('getDatiMese', { anno: currentYear, mese: currentMonth })
+    .then(onDataLoaded)
+    .catch(err => {
+      const msg = `<div class="loader" style="color:var(--red)">⚠ ${err.message}</div>`;
+      ['personeListD','personeListM'].forEach(id => document.getElementById(id).innerHTML = msg);
+    });
+
+  callWorker('getStorico', { anno: currentYear, mese: currentMonth, quanti: 6 })
+    .then(onStoricoLoaded)
+    .catch(() => {
+      const msg = '<tr><td colspan="5" style="padding:1rem;color:var(--text-faint)">Impossibile caricare</td></tr>';
+      ['storicoBodyD','storicoBodyM'].forEach(id => document.getElementById(id).innerHTML = msg);
+    });
+}
+
+function onDataLoaded(res) {
+  currentPagamenti = res.pagamenti || {};
+  ['noteTextareaD','noteTextareaM'].forEach(id => document.getElementById(id).value = res.note || '');
+  renderPersone();
+}
+function onStoricoLoaded(storico) { renderStorico(storico); }
+
+// ---- TOGGLE ----
+function togglePagamento(personaId) {
+  if (saving) return;
+  currentPagamenti[personaId] = !currentPagamenti[personaId];
+  renderPersone();
+  salvaOra();
+}
+function salvaOra() {
+  saving = true;
+  showSaving('Salvataggio…', '');
+  const note = document.getElementById(isMobile() ? 'noteTextareaM' : 'noteTextareaD').value;
+  callWorker('salvaDatiMese', { anno: currentYear, mese: currentMonth, pagamenti: currentPagamenti, note })
+    .then(() => {
+      saving = false;
+      showSaving('Salvato', 'saved');
+      setTimeout(hideSaving, 1800);
+      callWorker('getStorico', { anno: currentYear, mese: currentMonth, quanti: 6 }).then(onStoricoLoaded);
+    })
+    .catch(() => {
+      saving = false;
+      showSaving('Errore salvataggio', 'error');
+      setTimeout(hideSaving, 2800);
+    });
+}
+
+// ---- SCADENZA ----
+function getScadenzaInfo(personaId, isPaid) {
+  const giorno = SCADENZE[personaId];
+  if (!giorno) return null;
+  const meseVis  = new Date(currentYear, currentMonth, 1);
+  const meseOggi = new Date(oggi.getFullYear(), oggi.getMonth(), 1);
+  if (meseVis < meseOggi) return isPaid ? {cls:'ok',testo:`✓ pagato (scad. ${giorno})`} : {cls:'overdue',testo:`✗ non pagato (scad. ${giorno})`};
+  if (meseVis > meseOggi) return isPaid ? {cls:'ok',testo:`✓ pagato in anticipo`} : {cls:'neutral',testo:`scade il ${giorno} del mese`};
+  const oggiG = oggi.getDate();
+  if (isPaid) return {cls:'ok',testo:`✓ pagato (scad. ${giorno})`};
+  if (oggiG > giorno) { const d=oggiG-giorno; return {cls:'overdue',testo:`⚠ in ritardo di ${d} ${d===1?'giorno':'giorni'}`}; }
+  if (oggiG === giorno) return {cls:'upcoming',testo:`⏰ scade oggi!`};
+  const m = giorno-oggiG;
+  if (m <= 3) return {cls:'upcoming',testo:`⏰ scade tra ${m} ${m===1?'giorno':'giorni'}`};
+  return {cls:'neutral',testo:`scade il ${giorno} del mese`};
+}
+
+// ---- RENDER ----
+function buildPersoneHTML(listId, statTotaleId, statPagatoId, statMancanteId, progressBarId, progressPctId) {
+  let totale = 0, pagato = 0;
+  const detMap = {2:'2 quote · €11,70/mese', 1:'1 quota · €5,85/mese'};
+  PERSONE_CONFIG.forEach(p => {
+    totale += p.quote * QUOTA;
+    if (currentPagamenti[p.id]) pagato += p.quote * QUOTA;
+  });
+  const mancante = totale - pagato;
+  const pct = totale > 0 ? Math.round((pagato/totale)*100) : 0;
+
+  document.getElementById(statTotaleId).textContent   = fmt(totale);
+  document.getElementById(statPagatoId).textContent   = fmt(pagato);
+  document.getElementById(statMancanteId).textContent = fmt(mancante);
+  document.getElementById(statMancanteId).className   = 'stat-value ' + (mancante===0?'green':mancante<totale?'amber':'red');
+  document.getElementById(progressBarId).style.width  = pct + '%';
+  const pctEl = document.getElementById(progressPctId);
+  if (pct===0)       pctEl.innerHTML = 'Nessun pagamento registrato';
+  else if(pct===100) pctEl.innerHTML = '<span>✓ Tutto incassato</span>';
+  else               pctEl.innerHTML = `<span>${pct}%</span> incassato — ${fmt(mancante)} mancanti`;
+
+  const list = document.getElementById(listId);
+  list.innerHTML = '';
+  PERSONE_CONFIG.forEach(p => {
+    const isPaid    = !!currentPagamenti[p.id];
+    const imp       = p.quote * QUOTA;
+    const scInfo    = getScadenzaInfo(p.id, isPaid);
+    const isOverdue = scInfo && scInfo.cls==='overdue' && !isPaid;
+    const card = document.createElement('div');
+    card.className = 'persona-card' + (isPaid?' paid':'') + (isOverdue?' overdue':'');
+    card.setAttribute('role','listitem');
+    card.innerHTML = `
+      <div class="persona-left">
+        <div class="avatar" style="background:${p.color}1a;">${p.emoji}</div>
+        <div>
+          <div class="persona-nome">${p.nome}</div>
+          <div class="persona-det">${detMap[p.quote]||''}</div>
+          ${scInfo?`<span class="scadenza-tag ${scInfo.cls}">${scInfo.testo}</span>`:''}
+        </div>
+      </div>
+      <div class="persona-right">
+        <div class="persona-importo${isPaid?' paid':''}">${fmt(imp)}</div>
+        <label class="toggle" aria-label="Segna ${p.nome} come ${isPaid?'non pagato':'pagato'}">
+          <input type="checkbox" ${isPaid?'checked':''} ${saving?'disabled':''}
+                 onchange="togglePagamento('${p.id}')">
+          <span class="toggle-track"></span>
+        </label>
+      </div>`;
+    list.appendChild(card);
+  });
+}
+
+function renderPersone() {
+  buildPersoneHTML('personeListD','statTotaleD','statPagatoD','statMancanteD','progressBarD','progressPctD');
+  buildPersoneHTML('personeListM','statTotaleM','statPagatoM','statMancanteM','progressBarM','progressPctM');
+}
+
+function renderStorico(storico) {
+  const PAGERS=['daniele','attilio','martina'], QUOTE=[2,1,1];
+  ['storicoBodyD','storicoBodyM'].forEach(id => {
+    const tbody = document.getElementById(id);
+    tbody.innerHTML = '';
+    if (!storico||!storico.length) {
+      tbody.innerHTML = `<tr><td colspan="5" style="padding:1rem;color:var(--text-faint)">Nessun dato storico</td></tr>`;
+      return;
+    }
+    storico.forEach(s => {
+      const pag   = s.pagamenti||{};
+      const cells = PAGERS.map(pid => { const paid=!!pag[pid]; return `<td><span class="badge ${paid?'paid':'pending'}">${paid?'pagato':'n/p'}</span></td>`; });
+      let totInc=0,totTot=0;
+      PAGERS.forEach((pid,i)=>{ totTot+=QUOTE[i]*QUOTA; if(pag[pid])totInc+=QUOTE[i]*QUOTA; });
+      const cls=totInc===totTot?'paid':totInc===0?'pending':'partial';
+      const lbl=totInc===totTot?'completo':totInc===0?'nessuno':'parziale';
+      tbody.innerHTML += `<tr><td>${s.meseName} ${s.anno}</td>${cells.join('')}<td><span class="badge ${cls}">${lbl} · ${fmt(totInc)}</span></td></tr>`;
+    });
+  });
+}
+
+function fmt(n) { return '€'+n.toFixed(2).replace('.',','); }
+
+// ---- MESI ----
+function changeMonth(dir) {
+  currentMonth += dir;
+  if (currentMonth>11){currentMonth=0;currentYear++;}
+  if (currentMonth<0) {currentMonth=11;currentYear--;}
+  const label = MESI[currentMonth]+' '+currentYear;
+  document.getElementById('monthLabelDesktop').textContent =
+  document.getElementById('monthLabelMobile').textContent  = label;
+  currentPagamenti = {};
+  loadData();
+}
+
+// ---- NOTE ----
+['noteTextareaD','noteTextareaM'].forEach(id => {
+  document.getElementById(id).addEventListener('input', () => {
+    clearTimeout(noteTimer);
+    noteTimer = setTimeout(salvaOra, 1500);
+  });
+});
+
+// ---- INIT ----
+const initLabel = MESI[currentMonth]+' '+currentYear;
+document.getElementById('monthLabelDesktop').textContent =
+document.getElementById('monthLabelMobile').textContent  = initLabel;
+updateThemeIcons();
+loadData();
+</script>
+</body>
+</html>
